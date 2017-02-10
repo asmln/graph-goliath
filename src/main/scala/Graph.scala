@@ -9,7 +9,7 @@ class Graph[T <: GraphStorage](storage: T) {
     this(storage)
     for(i <- 0 until storage.size) {
       for(j <- 0 until storage.size) {
-        if (matrix(i)(j)) storage.addPath(i, j)
+        storage.setPath(i, j, matrix(i)(j))
       }
     }
   }
@@ -23,23 +23,28 @@ class Graph[T <: GraphStorage](storage: T) {
   }
 
   def checkRoute(a: Int, b: Int): Boolean = {
-    if (a == b) {
-      storage.path(a, b)
+    // если ищем путь в саму себя - то проверяем очевидный вариант,
+    // прежде чем запускать поиск длинного пути
+    if (a == b && storage.path(a, b)) {
+        true
     } else {
-      checkRoute(a, b, storage.createNodes(storage.size))
+      checkRoute(a, b, storage.createNodes(storage.size), firstStep = true)
     }
   }
 
-  private def checkRoute(a: Int, b: Int, nodes: NodeStorage): Boolean =
-    if (a == b) {
+  private def checkRoute(a: Int, b: Int, nodes: NodesStorage, firstStep: Boolean): Boolean =
+    // если из a есть прямой путь в саму себя - то мы не попадаем в эту функцию.
+    // значит надо искать путь через другие ноды.
+    // и выход на нулевом шаге невозможен.
+    if (a == b && !firstStep) {
       true
     } else {
-      nodes(a) = true
+      nodes(a) = a != b || !firstStep // не отмечаем ноду, если ищем длинный путь в саму себя
       var found = false
       var i = 0
       while ((i < storage.size) && !found) {
         if (storage.path(a, i) && !nodes(i)) {
-          found = checkRoute(i, b, nodes)
+          found = checkRoute(i, b, nodes, firstStep = false)
         }
         i += 1
       }
@@ -58,5 +63,15 @@ object Graph {
   }
   def apply(matrix: Array[Array[Boolean]]): Graph[MemoryGraphStorage] = {
     new Graph(new MemoryGraphStorage(matrix.length), matrix)
+  }
+}
+
+object GraphHDD {
+  def apply(nodesCount: Integer): Graph[HDDGraphStorage] = {
+    new Graph(new HDDGraphStorage(nodesCount))
+  }
+
+  def apply(matrix: Array[Array[Boolean]]): Graph[HDDGraphStorage] = {
+    new Graph(new HDDGraphStorage(matrix.length), matrix)
   }
 }
