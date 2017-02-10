@@ -2,7 +2,7 @@ import ByteOperations._
 import org.scalatest.{FlatSpec, Matchers}
 
 /**
-  * Created on 10.02.17.
+  * Created by Anatoly Samoylenko on 10.02.2017.
   */
 class ByteOperationsSpec extends FlatSpec with Matchers {
 
