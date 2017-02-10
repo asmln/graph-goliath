@@ -13,23 +13,23 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
   private def this(storage: GraphStorage, matrix: Array[Array[Boolean]]) {
     this(storage)
     for(i <- matrix.indices; j <- matrix.indices) {
-        storage.setPath(i, j, matrix(i)(j))
+        storage(i, j) = matrix(i)(j)
     }
   }
 
   def randomInit(n: Int): Unit = {
-    for(i <- 0L until storage.size; j <- 0L until storage.size) {
-        storage.setPath(i, j, Random.nextInt(n) == 0)
+    for(i <- storage.indices; j <- storage.indices) {
+        storage(i, j) = Random.nextInt(n) == 0
     }
   }
 
   def checkRoute(a: Long, b: Long): Boolean = {
     // если ищем путь в саму себя - то проверяем очевидный вариант,
     // прежде чем запускать поиск длинного пути
-    if (a == b && storage.path(a, b)) {
+    if (a == b && storage(a, b)) {
       true
     } else {
-      val nodes = storage.createNodes(storage.size)
+      val nodes = storage.createNodes(storage.length)
       val result = checkRoute(a, b, nodes, firstStep = true)
       nodes.close()
       result
@@ -45,8 +45,8 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
     } else {
       nodes(a) = a != b || !firstStep // не отмечаем ноду, если ищем длинный путь в саму себя
       var found = false
-      for (i <- 0L until storage.size; if !found) {
-        if (storage.path(a, i) && !nodes(i)) {
+      for (i <- storage.indices; if !found) {
+        if (storage(a, i) && !nodes(i)) {
           found = checkRoute(i, b, nodes, firstStep = false)
         }
       }

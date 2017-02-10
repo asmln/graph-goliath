@@ -4,6 +4,8 @@ import java.io.{File, RandomAccessFile}
 
 import gg.ByteOperations._
 
+import scala.collection.immutable.NumericRange.Exclusive
+
 /**
   * Created by Anatoly Samoylenko on 10.02.2017.
   */
@@ -21,14 +23,15 @@ private[graph] class GraphStorage (file: Option[File], nodesCount: Long) extends
   private val matrix: RandomAccessFile = new RandomAccessFile(storageFile, "rwd")
   matrix.setLength(bytesCount * nodesCount)
 
-  val size: Long = nodesCount
+  val length: Long = nodesCount
+  def indices: Exclusive[Long] = 0L until length
 
-  def path(a: Long, b: Long): Boolean = {
+  def apply(a: Long, b: Long): Boolean = {
     matrix.seek(positionToByteNumber(a, b, bytesCount))
     1 == bitFromByte(matrix.readByte(), positionToShift(b))
   }
 
-  def setPath(a: Long, b: Long, path: Boolean): Unit = {
+  def update(a: Long, b: Long, path: Boolean): Unit = {
     val byteNumber = positionToByteNumber(a, b, bytesCount)
     matrix.seek(byteNumber)
     val newByte = setBitInByte(matrix.readByte(), positionToShift(b), path)
