@@ -1,4 +1,4 @@
-import ByteOperations._
+import gg.ByteOperations._
 import org.scalatest.{FlatSpec, Matchers}
 
 /**

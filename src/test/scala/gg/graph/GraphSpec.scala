@@ -1,9 +1,11 @@
+package gg.graph
+
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 /**
   * Created by Anatoly Samoylenko on 10.02.17.
   */
-class Graph2Spec extends FlatSpec with Matchers with BeforeAndAfterAll {
+class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   // 0 -> 2 -> 4 -> 1
   // 4 -> 4
@@ -24,7 +26,7 @@ class Graph2Spec extends FlatSpec with Matchers with BeforeAndAfterAll {
     Array(false, false, false, false, false, false, false, false, false, true, false, false),
     Array(false, false, false, false, false, false, false, false, false, false, true, false)
   )
-  val graph = GraphHDD(matrix)
+  val graph = Graph(matrix)
 
   "Path 0 to 1" should "be exist" in {
     graph.checkRoute(0, 1) should be(true)
@@ -71,6 +73,6 @@ class Graph2Spec extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
   override protected def afterAll(): Unit = {
-    graph.clearResources()
+    graph.close()
   }
 }
