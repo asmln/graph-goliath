@@ -12,35 +12,31 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
 
   private def this(storage: GraphStorage, matrix: Array[Array[Boolean]]) {
     this(storage)
-    for(i <- matrix.indices) {
-      for(j <- matrix.indices) {
+    for(i <- matrix.indices; j <- matrix.indices) {
         storage.setPath(i, j, matrix(i)(j))
-      }
     }
   }
 
   def randomInit(n: Int): Unit = {
-    for(i <- 0L until storage.size) {
-      for(j <- 0L until storage.size) {
+    for(i <- 0L until storage.size; j <- 0L until storage.size) {
         storage.setPath(i, j, Random.nextInt(n) == 0)
-      }
     }
   }
 
-  def checkRoute(a: Int, b: Int): Boolean = {
+  def checkRoute(a: Long, b: Long): Boolean = {
     // если ищем путь в саму себя - то проверяем очевидный вариант,
     // прежде чем запускать поиск длинного пути
     if (a == b && storage.path(a, b)) {
       true
     } else {
       val nodes = storage.createNodes(storage.size)
-      val result = checkRoute(a, b, storage.createNodes(storage.size), firstStep = true)
+      val result = checkRoute(a, b, nodes, firstStep = true)
       nodes.close()
       result
     }
   }
 
-  private def checkRoute(a: Int, b: Int, nodes: NodesStorage, firstStep: Boolean): Boolean =
+  private def checkRoute(a: Long, b: Long, nodes: NodesStorage, firstStep: Boolean): Boolean =
   // если из a есть прямой путь в саму себя - то мы не попадаем в эту функцию.
   // значит надо искать путь через другие ноды.
   // и выход на нулевом шаге невозможен.
@@ -49,12 +45,10 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
     } else {
       nodes(a) = a != b || !firstStep // не отмечаем ноду, если ищем длинный путь в саму себя
       var found = false
-      var i = 0
-      while ((i < storage.size) && !found) {
+      for (i <- 0L until storage.size; if !found) {
         if (storage.path(a, i) && !nodes(i)) {
           found = checkRoute(i, b, nodes, firstStep = false)
         }
-        i += 1
       }
       found
     }
