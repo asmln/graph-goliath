@@ -51,6 +51,9 @@ class Graph[T <: GraphStorage](storage: T) {
       found
     }
 
+  def clearResources(): Unit = {
+    storage.clearResources()
+  }
 
   override def toString: String = {
     storage.toString

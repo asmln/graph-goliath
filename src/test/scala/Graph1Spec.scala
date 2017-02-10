@@ -37,5 +37,7 @@ class Graph1Spec extends FlatSpec with Matchers {
     graph.checkRoute(1, 0) should be(false)
   }
 
+  graph.clearResources()
+
 }
 

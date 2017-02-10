@@ -1,9 +1,9 @@
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 /**
   * Created by Anatoly Samoylenko on 10.02.17.
   */
-class Graph2Spec extends FlatSpec with Matchers {
+class Graph2Spec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   // 0 -> 2 -> 4 -> 1
   // 4 -> 4
@@ -70,4 +70,7 @@ class Graph2Spec extends FlatSpec with Matchers {
     graph.checkRoute(2, 0) should be(false)
   }
 
+  override protected def afterAll(): Unit = {
+    graph.clearResources()
+  }
 }
