@@ -3,49 +3,43 @@ import scala.util.Random
 /**
   * Created by Anatoly Samoylenko on 08.02.2017.
   */
-class Graph(nodesCount: Int) {
+class Graph[T <: GraphStorage](storage: T) {
 
-  val matrix: Array[Array[Byte]] = Array.ofDim[Byte](nodesCount, nodesCount)
-
-  def this(matrix: Array[Array[Byte]]) {
-    this(matrix.length)
-    for(i <- 0 until nodesCount) {
-      for(j <- 0 until nodesCount) {
-        if (matrix(i)(j) == 1) this.addRoute(i, j)
+  def this(storage: T, matrix: Array[Array[Boolean]]) {
+    this(storage)
+    for(i <- 0 until storage.size) {
+      for(j <- 0 until storage.size) {
+        if (matrix(i)(j)) storage.addPath(i, j)
       }
     }
-  }
-
-  def addRoute(a: Int, b:Int): Unit = {
-    matrix(a)(b) = 1
   }
 
   def randomInit(n: Int): Unit = {
-    for(i <- 0 until nodesCount) {
-      for(j <- 0 until nodesCount) {
-        matrix(i)(j) = if (Random.nextInt(n) == 0) 1 else 0
+    for(i <- 0 until storage.size) {
+      for(j <- 0 until storage.size) {
+        storage.setPath(i, j, Random.nextInt(n) == 0)
       }
     }
   }
 
-  def checkPath(a: Int, b: Int): Boolean = {
+  def checkRoute(a: Int, b: Int): Boolean = {
     if (a == b) {
-      matrix(a)(b) == 1
+      storage.path(a, b)
     } else {
-      checkPath(a, b, Array.ofDim[Byte](nodesCount))
+      checkRoute(a, b, storage.createNodes(storage.size))
     }
   }
 
-  private def checkPath(a: Int, b: Int, nodes: Array[Byte]): Boolean =
+  private def checkRoute(a: Int, b: Int, nodes: NodeStorage): Boolean =
     if (a == b) {
       true
     } else {
-      nodes(a) = 1
+      nodes(a) = true
       var found = false
       var i = 0
-      while ((i < nodesCount) && !found) {
-        if (matrix(a)(i) == 1 && nodes(i) == 0) {
-          found = checkPath(i, b, nodes)
+      while ((i < storage.size) && !found) {
+        if (storage.path(a, i) && !nodes(i)) {
+          found = checkRoute(i, b, nodes)
         }
         i += 1
       }
@@ -54,11 +48,15 @@ class Graph(nodesCount: Int) {
 
 
   override def toString: String = {
-    matrix.deep.mkString("\n")
+    storage.toString
   }
 }
 
 object Graph {
-  def apply(nodesCount: Integer): Graph = new Graph(nodesCount)
-  def apply(matrix: Array[Array[Byte]]): Graph = new Graph(matrix)
+  def apply(nodesCount: Integer): Graph[MemoryGraphStorage] = {
+    new Graph(new MemoryGraphStorage(nodesCount))
+  }
+  def apply(matrix: Array[Array[Boolean]]): Graph[MemoryGraphStorage] = {
+    new Graph(new MemoryGraphStorage(matrix.length), matrix)
+  }
 }

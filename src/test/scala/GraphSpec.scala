@@ -5,36 +5,36 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class GraphSpec extends FlatSpec with Matchers {
 
-  val matrix: Array[Array[Byte]] = Array(
-    Array(0.toByte, 1.toByte, 0.toByte, 0.toByte),
-    Array(0.toByte, 0.toByte, 1.toByte, 0.toByte),
-    Array(0.toByte, 0.toByte, 0.toByte, 0.toByte),
-    Array(0.toByte, 0.toByte, 1.toByte, 0.toByte)
+  val matrix: Array[Array[Boolean]] = Array(
+    Array(false, true, false, false),
+    Array(false, false, true, false),
+    Array(false, false, false, false),
+    Array(false, false, true, false)
   )
   val graph = Graph(matrix)
 
   "Path 0 to 1" should "be exist" in {
-    graph.checkPath(0, 1)
+    graph.checkRoute(0, 1)
   }
 
   "Path 0 to 2" should "be exist" in {
-    graph.checkPath(0, 2)
+    graph.checkRoute(0, 2)
   }
 
   "Path 3 to 2" should "be exist" in {
-    graph.checkPath(3, 2)
+    graph.checkRoute(3, 2)
   }
 
   "Path 0 to 0" should "be NOT exist" in {
-    graph.checkPath(0, 0)
+    graph.checkRoute(0, 0)
   }
 
   "Path 0 to 3" should "be NOT exist" in {
-    !graph.checkPath(0, 3)
+    !graph.checkRoute(0, 3)
   }
 
   "Path 1 to 0" should "be NOT exist" in {
-    !graph.checkPath(1, 0)
+    !graph.checkRoute(1, 0)
   }
 
 }
