@@ -1,4 +1,6 @@
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Calendar
 
 import gg.graph.Graph
 
@@ -11,72 +13,63 @@ object Main {
 
   val usage = """
     Usage:
-     gg [--path-file filename] [--graph-size num] [--start num] [--finish num]
-     gg [--graph-file filename] [--graph-size num] [--start num] [--finish num]
-     gg [--create-files num]
+      gg --create-diagonal graph-size
+      gg --create-fl graph-size
+      gg filename graph-size start finish
   """
 
-  def generateDiagonal(graphSize: Long) = {
-    new File("tmp").mkdir()
-    val graph = Graph("tmp/diagonal.bbb", graphSize)
-    for(i <- 0L until graphSize) {
-      graph.addPath(i, i)
+  def generateDiagonal(graphSize: Long): Unit = {
+    generateGraph(graphSize, "diagonal.bbb", g => {
+      for(i <- 0L until g.length) {
+        g.addPath(i, i)
+      }
+    })
+  }
+
+  def generateFirstToLast(graphSize: Long): Unit = {
+    generateGraph(graphSize, "first-to-last.bbb", g => {
+      for(i <- 0L until g.length - 1) {
+        g.addPath(i, i + 1)
+      }
+    })
+  }
+
+  private def generateGraph(graphSize: Long, fileName: String, generator: Graph => Unit): Unit = {
+    val tmp = new File("tmp")
+    if (!tmp.exists()) tmp.mkdir()
+    val file = new File(s"tmp/$fileName")
+    if (file.exists()) {
+      file.delete()
     }
+    val graph = Graph(s"tmp/$fileName", graphSize)
+    generator(graph)
     graph.close()
   }
 
   def main(args: Array[String]) {
-    if (args.length != 1) {
+    val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    println(s"Start time: ${sdf.format(Calendar.getInstance().getTime)}")
+
+    if (args.length == 0) {
       println(usage)
     } else {
-      val options = parseArgs(args)
-      if (options.contains('createfiles)) {
-        val graphSize = options('createfiles).asInstanceOf[Long]
-        generateDiagonal(graphSize)
-        //generateFirstToLast(graphSize)
-      } else {
-        val start = options('start).asInstanceOf[Long]
-        val finish = options('finish).asInstanceOf[Long]
-        val size = options('graphsize).asInstanceOf[Long]
-
-        val graph = if (options.contains('graphfile)) {
-          Graph(options('graphfile).asInstanceOf[String], size)
-        } else {
-          Graph(size)
-        }
-        if (graph.checkRoute(start, finish)) {
-          println(s"Route from $start to $finish exists.")
-        } else {
-          println(s"Route from $start to $finish not exists.")
-        }
-        graph.close()
+      args match {
+        case Array("--create-diagonal", value, _*) =>
+          generateDiagonal(value.toLong)
+        case Array("--create-fl", value, _*) =>
+          generateFirstToLast(value.toLong)
+        case Array(fileName, size, start, finish, _*) =>
+          val graph = Graph(fileName, size.toLong)
+          if (graph.checkRoute(start.toLong, finish.toLong)) {
+            println(s"Route from $start to $finish exists.")
+          } else {
+            println(s"Route from $start to $finish NOT exists.")
+          }
+          graph.close()
       }
     }
-  }
 
-  def parseArgs(args: Array[String]): OptionMap = {
-    val argList = args(0).split(" ").toList
-
-    def nextOption(map : OptionMap, list: List[String]) : OptionMap = {
-      list match {
-        case Nil => map
-        case "--create-files" :: value :: Nil =>
-          Map('createfiles -> value.toLong)
-        case "--path-file" :: value :: tail =>
-          nextOption(map ++ Map('pathfile -> value.toString), tail)
-        case "--graph-file" :: value :: tail =>
-          nextOption(map ++ Map('graphfile -> value.toString), tail)
-        case "--graph-size" :: value :: tail =>
-          nextOption(map ++ Map('graphsize -> value.toLong), tail)
-        case "--start" :: value :: tail =>
-          nextOption(map ++ Map('start -> value.toLong), tail)
-        case "--finish" :: value :: tail =>
-          nextOption(map ++ Map('finish -> value.toLong), tail)
-        case option :: tail => println("Unknown option " + option)
-          nextOption(map, list.tail)
-      }
-    }
-    nextOption(Map(), argList)
+    println(s"Finish time: ${sdf.format(Calendar.getInstance().getTime)}")
   }
 
 }
