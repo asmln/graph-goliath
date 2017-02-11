@@ -16,7 +16,6 @@ import scala.collection.immutable.NumericRange.Exclusive
 //это уменьшает размер файла
 private[graph] class GraphStorage (file: Option[File], nodesCount: Long) extends AutoCloseable {
 
-  private val lengthBytesCount = 8 //первые 8 байт для хранения длины файла
   private val bytesCount = nodesCount / BYTE_SIZE + 1
   private val uuid: String = java.util.UUID.randomUUID.toString
 
@@ -31,7 +30,7 @@ private[graph] class GraphStorage (file: Option[File], nodesCount: Long) extends
 
   private def createFile(file: File) = {
     val rf = new RandomAccessFile(file, "rwd")
-    rf.setLength(lengthBytesCount + bytesCount * nodesCount)
+    rf.setLength(bytesCount * nodesCount)
     rf.writeLong(nodesCount)
     rf
   }
@@ -40,12 +39,12 @@ private[graph] class GraphStorage (file: Option[File], nodesCount: Long) extends
   def indices: Exclusive[Long] = 0L until length
 
   def apply(a: Long, b: Long): Boolean = {
-    matrix.seek(lengthBytesCount + positionToByteNumber(a, b, bytesCount))
+    matrix.seek(positionToByteNumber(a, b, bytesCount))
     1 == bitFromByte(matrix.readByte(), positionToShift(b))
   }
 
   def update(a: Long, b: Long, path: Boolean): Unit = {
-    val byteNumber = lengthBytesCount + positionToByteNumber(a, b, bytesCount)
+    val byteNumber = positionToByteNumber(a, b, bytesCount)
     matrix.seek(byteNumber)
     val newByte = setBitInByte(matrix.readByte(), positionToShift(b), path)
     matrix.seek(byteNumber)
