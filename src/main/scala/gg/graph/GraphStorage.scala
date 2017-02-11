@@ -14,14 +14,21 @@ private[graph] class GraphStorage (file: Option[File], nodesCount: Long) extends
 
   private val bytesCount = nodesCount / BYTE_SIZE + 1
   private val uuid: String = java.util.UUID.randomUUID.toString
-  private val storageFile: File = file match {
-    case Some(fl) if fl.exists() =>
-      fl
+
+  private val matrix: RandomAccessFile = file match {
+    case Some(fl) if fl.exists =>
+      new RandomAccessFile(fl, "rwd")
+    case Some(fl) if !fl.exists =>
+      createFile(fl)
     case _ =>
-      new File(s"tmp/graph-$uuid.bbb")
+      createFile(new File(s"tmp/graph-$uuid.bbb"))
   }
-  private val matrix: RandomAccessFile = new RandomAccessFile(storageFile, "rwd")
-  matrix.setLength(bytesCount * nodesCount)
+
+  private def createFile(file: File) = {
+    val rf = new RandomAccessFile(file, "rwd")
+    rf.setLength(bytesCount * nodesCount)
+    rf
+  }
 
   val length: Long = nodesCount
   def indices: Exclusive[Long] = 0L until length

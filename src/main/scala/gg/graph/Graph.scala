@@ -17,6 +17,10 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
     }
   }
 
+  def addPath(a: Long, b: Long): Unit = {
+    storage(a, b) = true
+  }
+
   def randomInit(n: Int): Unit = {
     for(i <- storage.indices; j <- storage.indices) {
         storage(i, j) = Random.nextInt(n) == 0
@@ -24,6 +28,7 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
   }
 
   def checkRoute(a: Long, b: Long): Boolean = {
+    if (Math.max(a, b) > storage.length) throw new Exception("Position out of border!")
     // если ищем путь в саму себя - то проверяем очевидный вариант,
     // прежде чем запускать поиск длинного пути
     if (a == b && storage(a, b)) {
@@ -63,6 +68,7 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
 }
 
 object Graph {
+
   def apply(nodesCount: Long) = new Graph(GraphStorage(None, nodesCount))
 
   def apply(matrix: Array[Array[Boolean]]) = new Graph(GraphStorage(None, matrix.length), matrix)
@@ -72,7 +78,8 @@ object Graph {
     if (file.exists()) {
       new Graph(GraphStorage(Some(file), Math.min(file.length(), nodesCount)))
     } else {
-      new Graph(GraphStorage(None, nodesCount))
+      new Graph(GraphStorage(Some(file), nodesCount))
     }
   }
+
 }
