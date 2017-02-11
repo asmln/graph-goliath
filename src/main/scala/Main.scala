@@ -13,9 +13,9 @@ object Main {
 
   val usage = """
     Usage:
-      gg --create-diagonal graph-size
-      gg --create-fl graph-size
-      gg filename graph-size start finish
+      gg.jar --create-diagonal graph-size
+      gg.jar --create-fl graph-size
+      gg.jar filename graph-size start finish
   """
 
   def generateDiagonal(graphSize: Long): Unit = {
