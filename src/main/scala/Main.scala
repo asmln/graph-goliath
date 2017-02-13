@@ -1,6 +1,7 @@
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.concurrent.ThreadLocalRandom
 
 import gg.graph.Graph
 
@@ -15,6 +16,7 @@ object Main {
     Usage:
       gg.jar --create-diagonal graph-size
       gg.jar --create-fl graph-size
+      gg.jar --create-r graph-size route-size
       gg.jar filename graph-size start finish
   """
 
@@ -31,6 +33,25 @@ object Main {
       for(i <- 0L until g.length - 1) {
         g.addPath(i, i + 1)
       }
+    })
+  }
+
+  def generateRandom(graphSize: Long, routeSize: Long): Unit = {
+    generateGraph(graphSize, "random.bbb", g => {
+      var a = ThreadLocalRandom.current().nextLong(g.length)
+      val routeStr = new StringBuilder()
+      routeStr.append(s"$a")
+      if (routeSize == 1) {
+        g.addPath(a, a)
+      } else {
+        for (i <- 0L until routeSize - 1) {
+          var b = ThreadLocalRandom.current().nextLong(g.length)
+          g.addPath(a, b)
+          routeStr.append(s"->$b")
+          a = b
+        }
+      }
+      println(s"Route: $routeStr")
     })
   }
 
@@ -54,10 +75,12 @@ object Main {
       println(usage)
     } else {
       args match {
-        case Array("--create-diagonal", value, _*) =>
-          generateDiagonal(value.toLong)
-        case Array("--create-fl", value, _*) =>
-          generateFirstToLast(value.toLong)
+        case Array("--create-diagonal", size, _*) =>
+          generateDiagonal(size.toLong)
+        case Array("--create-fl", size, _*) =>
+          generateFirstToLast(size.toLong)
+        case Array("--create-r", size, rSize, _*) =>
+          generateRandom(size.toLong, rSize.toLong)
         case Array(fileName, size, start, finish, _*) =>
           val graph = Graph(fileName, size.toLong)
           if (graph.checkRoute(start.toLong, finish.toLong)) {

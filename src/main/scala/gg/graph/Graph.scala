@@ -1,9 +1,7 @@
 package gg.graph
 
 import java.io.File
-
-import scala.annotation.tailrec
-import scala.util.Random
+import java.util.concurrent.ThreadLocalRandom
 
 /**
   * Created by Anatoly Samoylenko on 10.02.2017.
@@ -29,7 +27,7 @@ class Graph private (storage: GraphStorage) extends AutoCloseable {
   //случайным образом заполняет файл
   def randomInit(n: Int): Unit = {
     for(i <- storage.indices; j <- storage.indices) {
-        storage(i, j) = Random.nextInt(n) == 0
+        storage(i, j) = ThreadLocalRandom.current().nextInt(n) == 0
     }
   }
 
